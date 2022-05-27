@@ -92,14 +92,91 @@ void process_logout_request(int socket_fd,  struct sockaddr_in *server_address, 
 }
 
 
-void process_send_request(int socket_fd,  struct sockaddr_in *server_address, char *client_id_ascii)
+void process_send_request(int socket_fd,  struct sockaddr_in *server_address, char *client_id_ascii, char *message_to_be_sent)
 {
+  chat_message_t message;
+  memset(&message, 0, sizeof(message));
 
+  message.version = MESSAGE_PROTOCOL_VERSION;
+  message.type = MESSAGE;
+  message.message_id = random() % 65535;
+  message.payload_length = sizeof(payload_login_t);
+  strcpy(message.payload.message.client_id.message, client_id_ascii);
+  strcpy(message.payload.message.message.message, message_to_be_sent);
+
+  if (sendto(socket_fd, &message, sizeof(message), 0, (struct sockaddr *)server_address, sizeof(*server_address)) < 0)
+  {
+    perror("sendto");
+    exit(1);
+  }
+
+  chat_message_t response;
+  memset(&response, 0, sizeof(response));
+  if (recvfrom(socket_fd, &response, sizeof(response), 0, NULL, NULL) < 0)
+  {
+    perror("recvfrom");
+    exit(1);
+  }
+
+  if (response.type == ACK)
+  {
+    printf("Message Transmitted successful\n");
+  }
+  else if (response.type == NAK)
+  {
+    printf("Message Transmitted successful\n");
+  }
+  else
+  {
+    printf("Unexpected response\n");
+  }
 }
 
-void process_receive_request(int socket_fd,  struct sockaddr_in *server_address)
+void process_receive_request(int socket_fd,  struct sockaddr_in *server_address,  char *client_id_ascii)
 {
+  chat_message_t message;
+  memset(&message, 0, sizeof(message));
 
+  message.version = MESSAGE_PROTOCOL_VERSION;
+  message.type = MESSAGE;
+  message.message_id = random() % 65535;
+  message.payload_length = sizeof(payload_login_t);
+  strcpy(message.payload.message.client_id.message, client_id_ascii);
+
+  if (sendto(socket_fd, &message, sizeof(message), 0, (struct sockaddr *)server_address, sizeof(*server_address)) < 0)
+  {
+    perror("sendto");
+    exit(1);
+  }
+
+  chat_message_t response;
+  memset(&response, 0, sizeof(response));
+  if (recvfrom(socket_fd, &response, sizeof(response), 0, NULL, NULL) < 0)
+  {
+    perror("recvfrom");
+    exit(1);
+  }
+
+  if (response.type == ACK)
+  {
+    printf("Message Transmitted successful\n");
+    chat_message_t message_received;
+    memset(&message_received, 0, sizeof(message_received));
+    if (recvfrom(socket_fd, &message_received, sizeof(message_received), 0, NULL, NULL) < 0)
+    {
+      perror("recvfrom");
+      exit(1);
+    }
+    printf("Message Received: %s\n", message_received.payload.message.message.message);
+  }
+  else if (response.type == NAK)
+  {
+    printf("Message Transmitted successful\n");
+  }
+  else
+  {
+    printf("Unexpected response\n");
+  }
 }
 
 int main(int argc, char *argv[])
@@ -154,29 +231,37 @@ int main(int argc, char *argv[])
       case 1:
       {
         char client_id_ascii[MAX_INPUT_LEN] = { 0 };
-        Get_Client_ID(client_id_ascii, MAX_INPUT_LEN);
+        get_client_id(client_id_ascii, MAX_INPUT_LEN);
         process_login_request(socket_fd, &server_address, client_id_ascii);
       }
       break;
       case 2:
       {
         char client_id_ascii[MAX_INPUT_LEN] = { 0 };
-        Get_Client_ID(client_id_ascii, MAX_INPUT_LEN);
+        get_client_id(client_id_ascii, MAX_INPUT_LEN);
         process_logout_request(socket_fd, &server_address, client_id_ascii);
       }
       break;
       case 3:
       {
         char client_id_ascii[MAX_INPUT_LEN] = { 0 };
-        Get_Client_ID(client_id_ascii, MAX_INPUT_LEN);
-        process_send_request(socket_fd, &server_address, client_id_ascii);
+        get_client_id(client_id_ascii, MAX_INPUT_LEN);
+        char message_ascii[MAX_INPUT_LEN] = { 0 };
+        get_message_to_be_sent(message_ascii, MAX_INPUT_LEN);
+        process_send_request(socket_fd, &server_address, client_id_ascii, message_ascii);
       }
       break;
       case 4:
       {
-        process_receive_request(socket_fd, &server_address);
+        char client_id_ascii[MAX_INPUT_LEN] = { 0 };
+        get_client_id(client_id_ascii, MAX_INPUT_LEN);
+        process_receive_request(socket_fd, &server_address, client_id_ascii);
       }
       break;
+      case 5:
+      {
+        is_exit_requested = true;
+      }
       default:
         printf("Invalid choice\n");
         break;

@@ -12,8 +12,13 @@ void get_line_from_stdin(char *line, int max_length) {
   line[i] = '\0';
 }
 
-void Get_Client_ID(char *string, int len) {
-  printf("Enter Client-ID: \n");
+void get_client_id(char *string, int len) {
+  printf("Enter Client-ID:");
+  get_line_from_stdin(string, len);
+}
+
+void get_message_to_be_sent(char *string, int len) {
+  printf("Enter Message:");
   get_line_from_stdin(string, len);
 }
 
@@ -24,6 +29,7 @@ void print_user_menu(void) {
   printf("2. Logout\n");
   printf("3. Send\n");
   printf("4. Receive\n");
+  printf("5. Exit\n");
 }
 
 int get_user_choice(void) {

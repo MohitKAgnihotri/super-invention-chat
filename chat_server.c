@@ -96,6 +96,8 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
+  init_client_list();
+
   /* Get port from command line arguments or stdin.
    * For this server, this is fixed to 1113*/
   port = atoi(argv[1]);
