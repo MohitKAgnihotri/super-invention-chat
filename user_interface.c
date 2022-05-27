@@ -38,6 +38,6 @@ int get_user_choice(void) {
   printf("Please enter your choice: ");
   scanf("%c", &choice);
   choice_int = atoi(&choice);
-  (void) getc(stdin); //flush \n
+  (void) getc(stdin);
   return choice_int;
 }

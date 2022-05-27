@@ -48,7 +48,6 @@ void process_login_request(int socket_fd,  struct sockaddr_in *server_address, c
   {
       printf("Unexpected response\n");
   }
-
 }
 
 void process_logout_request(int socket_fd,  struct sockaddr_in *server_address, char *client_id_ascii)
@@ -78,17 +77,16 @@ void process_logout_request(int socket_fd,  struct sockaddr_in *server_address, 
 
   if (response.type == ACK)
   {
-    printf("Login successful\n");
+    printf("Logout successful\n");
   }
   else if (response.type == NAK)
   {
-    printf("Login failed\n");
+    printf("Logout failed\n");
   }
   else
   {
     printf("Unexpected response\n");
   }
-
 }
 
 
@@ -124,7 +122,7 @@ void process_send_request(int socket_fd,  struct sockaddr_in *server_address, ch
   }
   else if (response.type == NAK)
   {
-    printf("Message Transmitted successful\n");
+    printf("Message Transmission Failed\n");
   }
   else
   {
@@ -160,6 +158,7 @@ void process_receive_request(int socket_fd,  struct sockaddr_in *server_address,
   if (response.type == ACK)
   {
     printf("Message Transmitted successful\n");
+
     chat_message_t message_received;
     memset(&message_received, 0, sizeof(message_received));
     if (recvfrom(socket_fd, &message_received, sizeof(message_received), 0, NULL, NULL) < 0)
@@ -171,7 +170,7 @@ void process_receive_request(int socket_fd,  struct sockaddr_in *server_address,
   }
   else if (response.type == NAK)
   {
-    printf("Message Transmitted successful\n");
+    printf("Message Transmission Failed\n");
   }
   else
   {
@@ -185,8 +184,6 @@ int main(int argc, char *argv[])
   int server_port, socket_fd;
   struct hostent *server_host;
   struct sockaddr_in server_address;
-  char message_received[300];
-
   bool is_exit_requested = false;
 
   /* Get server name from command line arguments or stdin. */
@@ -267,8 +264,6 @@ int main(int argc, char *argv[])
         break;
     }
   }
-
-
   close(socket_fd);
   return 0;
 }

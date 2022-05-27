@@ -1,12 +1,9 @@
 #include <netinet/in.h>
-#include <pthread.h>
-#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <unistd.h>
 #include <stdbool.h>
 #include "chat_server.h"
 #include "chat_message.h"
@@ -84,7 +81,8 @@ void store_message(int index, char *message) {
   }
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
   int port, new_socket_fd;
   pthread_attr_t pthread_client_attr;
   pthread_t pthread;
@@ -105,19 +103,6 @@ int main(int argc, char *argv[]) {
   /*Create the server socket */
   server_socket_fd = CreateServerSocket(port);
 
-  /*Setup the signal handler*/
-  SetupSignalHandler();
-
-  /* Initialise pthread attribute to create detached threads. */
-  if (pthread_attr_init(&pthread_client_attr) != 0) {
-    perror("pthread_attr_init");
-    exit(1);
-  }
-  if (pthread_attr_setdetachstate(&pthread_client_attr, PTHREAD_CREATE_DETACHED) != 0) {
-    perror("pthread_attr_setdetachstate");
-    exit(1);
-  }
-
   while (1) {
     chat_message_t message;
     client_address_len = sizeof client_address;
@@ -133,7 +118,6 @@ int main(int argc, char *argv[]) {
 
     process_client_message(server_socket_fd, &client_address, &message);
   }
-
 }
 
 int CreateServerSocket(int port) {
@@ -162,21 +146,6 @@ int CreateServerSocket(int port) {
   int enable = 1;
   setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable));
   return socket_fd;
-}
-
-void SetupSignalHandler() {/* Assign signal handlers to signals. */
-  if (signal(SIGPIPE, SIG_IGN) == SIG_ERR) {
-    perror("signal");
-    exit(1);
-  }
-  if (signal(SIGTERM, signal_handler) == SIG_ERR) {
-    perror("signal");
-    exit(1);
-  }
-  if (signal(SIGINT, signal_handler) == SIG_ERR) {
-    perror("signal");
-    exit(1);
-  }
 }
 
 int send_message_for_client(int socket, struct sockaddr_in *client_address, int client_index, short message_id) {
@@ -298,9 +267,4 @@ void send_nack(int socket, struct sockaddr_in *client_address, short message_id)
     perror("sendto");
     exit(1);
   }
-}
-
-void signal_handler(int signal_number) {
-  close(server_socket_fd);
-  exit(0);
 }
