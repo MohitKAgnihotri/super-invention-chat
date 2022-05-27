@@ -8,8 +8,9 @@ link_libraries(pthread)
 
 add_executable(chat_server
         chat_server.c
-        chat_server.h chat_message.h user_interface.c user_interface.h)
+        chat_server.h chat_message.h )
 
-add_executable(daytime_RFC_867_Client
+add_executable(chat_client
         chat_client.c
-        chat_client.h)
+        chat_client.h
+        user_interface.c user_interface.h)
