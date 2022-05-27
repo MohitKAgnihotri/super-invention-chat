@@ -13,4 +13,4 @@ add_executable(chat_server
 add_executable(chat_client
         chat_client.c
         chat_client.h
-        user_interface.c user_interface.h)
+        user_interface.c chat_message.h user_interface.h)
